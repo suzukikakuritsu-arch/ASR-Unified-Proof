@@ -6,15 +6,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Lean 4 Build and Proof Check
+      - name: Setup Lean
         uses: leanprover/lean-action@v1
         with:
-          # ここでビルドを有効にします。
-          # 自動的に lake update と lake build を実行してくれます。
-          build: true
+          build: false
+
+      - name: Hard-coded Path Build
+        run: |
+          # 環境変数 PATH を無視し、バイナリを直接指定して実行
+          /home/runner/.elan/bin/lake update
+          /home/runner/.elan/bin/lake build
 
       - name: Progress Report
-        # ビルドが終わった後に、結果だけを表示
         run: |
           echo "=== ASR Proof Status Report ==="
           grep -r "sorry" . --include="*.lean" | wc -l || true
