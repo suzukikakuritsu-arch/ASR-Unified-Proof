@@ -9,17 +9,16 @@ jobs:
       - name: Install Elan
         run: |
           curl https://leanprover-community.github.io/elan/elan-init.sh -sSf | sh -s -- -y
-          # 強制的にパスを通す
           echo "$HOME/.elan/bin" >> $GITHUB_PATH
 
       - name: Lake Update & Build
         run: |
-          # 確実にパスを読み込んでから実行
-          export PATH="$HOME/.elan/bin:$PATH"
-          lake update
-          lake build
+          # パスを明示的に指定して実行
+          $HOME/.elan/bin/lake update
+          $HOME/.elan/bin/lake build
 
       - name: Check Progress
         run: |
-          echo "Remaining Sorry Count:"
+          echo "=== ASR Proof Progress Report ==="
+          echo "Remaining 'sorry' count:"
           grep -r "sorry" . | wc -l
