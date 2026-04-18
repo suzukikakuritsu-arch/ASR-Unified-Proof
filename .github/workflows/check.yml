@@ -6,20 +6,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ここで elan とパスの設定が自動完結します
-      - name: Install Lean 4
-        uses: leanprover/lean-action@v1
-        with:
-          build: false # 後ほど手動で lake build を行うため
+      - name: Install Elan
+        run: |
+          curl https://leanprover-community.github.io/elan/elan-init.sh -sSf | sh -s -- -y
+          # 重要：インストール先を即座にGITHUB_PATHに登録
+          echo "$HOME/.elan/bin" >> $GITHUB_PATH
 
-      - name: Lake Update
-        run: lake update
-
-      - name: Lake Build
-        run: lake build
+      - name: Verify and Build
+        run: |
+          # パスを強制的にこのステップのセッションにも追加
+          export PATH="$HOME/.elan/bin:$PATH"
+          
+          # コマンドの所在を確認（これでエラーならインストール失敗）
+          which lake
+          
+          lake update
+          lake build
 
       - name: Progress Report
         run: |
           echo "=== ASR Proof Status Report ==="
-          echo "Number of 'sorry' remaining in your proof:"
-          grep -r "sorry" . --include="*.lean" | wc -l
+          # sorry のカウント
+          grep -r "sorry" . --include="*.lean" | wc -l || true
