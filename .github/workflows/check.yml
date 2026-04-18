@@ -5,15 +5,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Elan
+
+      - name: Install Elan (Lean 4 Manager)
         run: |
           curl https://leanprover-community.github.io/elan/elan-init.sh -sSf | sh -s -- -y
           echo "$HOME/.elan/bin" >> $GITHUB_PATH
-      - name: Lake Update & Build
+
+      - name: Lake Update
+        # $GITHUB_PATH に追加した後は、このステップから lake が使えるようになります
         run: |
           lake update
-          lake build
-      - name: Sorry Counter
+
+      - name: Lake Build
         run: |
-          echo "Current Sorry Count:"
+          lake build
+
+      - name: Check for Sorry
+        run: |
+          echo "Count of remaining 'sorry':"
           grep -r "sorry" . | wc -l
