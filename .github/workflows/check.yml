@@ -5,16 +5,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
+      # これだけで Lean 4 環境は整います。
+      - uses: leanprover/lean-action@v1
 
-      # 1. elan/lake を自前で入れず、公式 Action を「信頼」して使う
-      - name: Setup Lean 4
-        uses: leanprover/lean-action@v1
-        with:
-          # ここでビルドまで一気に任せるのが2026年の鉄則
-          build: true
-
-      # 2. 結果の確認だけを行う
-      - name: Progress Report
-        run: |
-          echo "=== ASR Proof Status Report ==="
-          grep -r "sorry" . --include="*.lean" | wc -l || true
+      # 前のステップで elan がパスを通しているので、そのまま叩けるはず。
+      - name: Build
+        run: lake build
