@@ -6,24 +6,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install and Build (Unified)
+      # 1. elan/lake を自前で入れず、公式 Action を「信頼」して使う
+      - name: Setup Lean 4
+        uses: leanprover/lean-action@v1
+        with:
+          # ここでビルドまで一気に任せるのが2026年の鉄則
+          build: true
+
+      # 2. 結果の確認だけを行う
+      - name: Progress Report
         run: |
-          # 1. Elanをインストール
-          curl https://leanprover-community.github.io/elan/elan-init.sh -sSf | sh -s -- -y
-          
-          # 2. このシェルセッションにパスを強制注入
-          source $HOME/.elan/env
-          export PATH="$HOME/.elan/bin:$PATH"
-          
-          # 3. 実行ファイルの存在を執拗に確認
-          which lake || (echo "ERROR: Lake is missing"; exit 1)
-          
-          # 4. ビルド実行
-          echo "Starting lake update... (Be patient, Mathlib is huge)"
-          lake update
-          
-          echo "Starting lake build..."
-          lake build
-          
-          echo "=== ASR Proof Progress Report ==="
+          echo "=== ASR Proof Status Report ==="
           grep -r "sorry" . --include="*.lean" | wc -l || true
