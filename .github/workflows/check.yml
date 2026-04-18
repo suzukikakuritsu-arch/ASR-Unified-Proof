@@ -6,17 +6,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 1. 自分で 'lake' を叩かず、アクションにすべて任せる
-      - name: Lean 4 Setup and Build
-        uses: leanprover/lean-action@v1
-        with:
-          # ここを true にすると、アクションが内部で 
-          # lake update と lake build を自動実行します。
-          # これにより、パスの不整合（127エラー）が物理的に発生しなくなります。
-          build: true
-
-      # 2. ビルドが終わった後に、結果の統計だけを出す
-      - name: Progress Report
+      - name: Install and Build (Unified)
         run: |
+          # 1. Elanをインストール
+          curl https://leanprover-community.github.io/elan/elan-init.sh -sSf | sh -s -- -y
+          
+          # 2. このシェルセッションにパスを強制注入
+          source $HOME/.elan/env
+          export PATH="$HOME/.elan/bin:$PATH"
+          
+          # 3. 実行ファイルの存在を執拗に確認
+          which lake || (echo "ERROR: Lake is missing"; exit 1)
+          
+          # 4. ビルド実行
+          echo "Starting lake update... (Be patient, Mathlib is huge)"
+          lake update
+          
+          echo "Starting lake build..."
+          lake build
+          
           echo "=== ASR Proof Progress Report ==="
           grep -r "sorry" . --include="*.lean" | wc -l || true
