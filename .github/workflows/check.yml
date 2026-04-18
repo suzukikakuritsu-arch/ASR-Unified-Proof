@@ -6,19 +6,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Elan
+      - name: Install Elan (Lean 4 Manager)
         run: |
           curl https://leanprover-community.github.io/elan/elan-init.sh -sSf | sh -s -- -y
+          # 次のステップ以降でも見えるようにパスを追加
           echo "$HOME/.elan/bin" >> $GITHUB_PATH
 
-      - name: Lake Update & Build
+      - name: Lake Update and Build
         run: |
-          # パスを明示的に指定して実行
-          $HOME/.elan/bin/lake update
-          $HOME/.elan/bin/lake build
+          # このステップ内でも即座にパスを有効化
+          export PATH="$HOME/.elan/bin:$PATH"
+          
+          # Mathlibの依存関係を解決
+          lake update
+          # プロジェクト全体をビルド
+          lake build
 
-      - name: Check Progress
+      - name: Progress Report
         run: |
-          echo "=== ASR Proof Progress Report ==="
-          echo "Remaining 'sorry' count:"
-          grep -r "sorry" . | wc -l
+          echo "=== ASR Proof Status Report ==="
+          echo "Count of remaining 'sorry':"
+          grep -r "sorry" . | grep ".lean" | wc -l
