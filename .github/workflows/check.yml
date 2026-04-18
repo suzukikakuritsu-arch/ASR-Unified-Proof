@@ -6,22 +6,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Elan and Build Project
+      # URLを叩くのではなく、公式がメンテナンスしているActionを使用
+      - name: Setup Lean
+        uses: leanprover/lean-action@v1
+        with:
+          # プロジェクト内の lean-toolchain を自動で読み取ります
+          build: false 
+
+      - name: Lake Update
+        # このステップでは既にパスが通っています
+        run: lake update
+
+      - name: Lake Build
+        run: lake build
+
+      - name: Progress Report
         run: |
-          # 1. Elanのインストール
-          curl https://leanprover-community.github.io/elan/elan-init.sh -sSf | sh -s -- -y
-          
-          # 2. パスをこの実行セッションに強制適用
-          source $HOME/.elan/env
-          export PATH="$HOME/.elan/bin:$PATH"
-          
-          # 3. 実行確認 (ここで見つからない場合は elan 自体が失敗している)
-          which lake || exit 1
-          
-          # 4. Mathlibの更新とビルドを一気に実行
-          lake update
-          lake build
-          
-          # 5. 進捗レポート
-          echo "=== ASR Proof Progress Report ==="
+          echo "=== ASR Proof Status Report ==="
           grep -r "sorry" . --include="*.lean" | wc -l || true
