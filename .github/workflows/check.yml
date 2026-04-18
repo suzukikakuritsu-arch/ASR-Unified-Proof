@@ -6,20 +6,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Lean
+      - name: Lean 4 Build and Proof Check
         uses: leanprover/lean-action@v1
         with:
-          # マニフェストがなくても、まず環境だけ作らせる
-          build: false
-
-      - name: Generate Manifest and Build
-        run: |
-          # マニフェストを作成し、Mathlibを同期
-          lake update
-          # プロジェクトをビルド
-          lake build
+          # ここでビルドを有効にします。
+          # 自動的に lake update と lake build を実行してくれます。
+          build: true
 
       - name: Progress Report
+        # ビルドが終わった後に、結果だけを表示
         run: |
           echo "=== ASR Proof Status Report ==="
           grep -r "sorry" . --include="*.lean" | wc -l || true
