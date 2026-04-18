@@ -6,19 +6,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # URLを叩くのではなく、公式がメンテナンスしているActionを使用
       - name: Setup Lean
         uses: leanprover/lean-action@v1
         with:
-          # プロジェクト内の lean-toolchain を自動で読み取ります
-          build: false 
+          # マニフェストがなくても、まず環境だけ作らせる
+          build: false
 
-      - name: Lake Update
-        # このステップでは既にパスが通っています
-        run: lake update
-
-      - name: Lake Build
-        run: lake build
+      - name: Generate Manifest and Build
+        run: |
+          # マニフェストを作成し、Mathlibを同期
+          lake update
+          # プロジェクトをビルド
+          lake build
 
       - name: Progress Report
         run: |
