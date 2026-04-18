@@ -6,15 +6,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      # ASRプロジェクトに Lean 4 と Lake の環境を準備する
-      - name: Setup Lean 4
-        uses: leanprover/lean-action@v1
+      # 1. Leanの環境を整える
+      - uses: leanprover/lean-action@v1
         with:
-          # ここでビルドまで任せることで、パスの問題を物理的に排除します
-          build: true
+          # ビルドは次のステップで自分でやります
+          build: false
 
-      # 証明内の 'sorry' (未完成部分) を進捗として可視化する
-      - name: ASR Proof Progress
+      # 2. ここが魔法の一行です。
+      # 注文書（manifest）がないなら、ビルドの直前に自分で作らせるだけ。
+      - name: Build
         run: |
-          echo "=== ASR Unified Proof Status ==="
-          grep -r "sorry" . --include="*.lean" | wc -l || true
+          source $HOME/.elan/env
+          lake update   # これが「注文書」を自動生成するコマンドです
+          lake build    # これでビルドが走ります
