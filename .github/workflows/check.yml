@@ -6,28 +6,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 1. 環境構築 (パスが通らなくても場所は固定される)
-      - name: Setup Lean
+      # 1. 自分で 'lake' を叩かず、アクションにすべて任せる
+      - name: Lean 4 Setup and Build
         uses: leanprover/lean-action@v1
         with:
-          build: false
+          # ここを true にすると、アクションが内部で 
+          # lake update と lake build を自動実行します。
+          # これにより、パスの不整合（127エラー）が物理的に発生しなくなります。
+          build: true
 
-      # 2. 絶対パスを指定して、一気に実行
-      - name: Build with Absolute Path
-        run: |
-          # elanがインストールされる絶対パスを直接指定
-          LAKE_BIN="/home/runner/.elan/bin/lake"
-          
-          echo "Checking lake at: $LAKE_BIN"
-          $LAKE_BIN --version || (echo "Lake not found at absolute path"; exit 1)
-          
-          echo "Starting lake update (this may take 5-10 minutes)..."
-          $LAKE_BIN update
-          
-          echo "Starting lake build..."
-          $LAKE_BIN build
-
-      # 3. 進捗確認
+      # 2. ビルドが終わった後に、結果の統計だけを出す
       - name: Progress Report
         run: |
           echo "=== ASR Proof Progress Report ==="
