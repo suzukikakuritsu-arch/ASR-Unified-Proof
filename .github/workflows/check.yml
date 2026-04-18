@@ -6,18 +6,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 1. 環境構築 (パスが通らなくても場所は固定される)
       - name: Setup Lean
         uses: leanprover/lean-action@v1
         with:
           build: false
 
-      - name: Hard-coded Path Build
+      # 2. 絶対パスを指定して、一気に実行
+      - name: Build with Absolute Path
         run: |
-          # 環境変数 PATH を無視し、バイナリを直接指定して実行
-          /home/runner/.elan/bin/lake update
-          /home/runner/.elan/bin/lake build
+          # elanがインストールされる絶対パスを直接指定
+          LAKE_BIN="/home/runner/.elan/bin/lake"
+          
+          echo "Checking lake at: $LAKE_BIN"
+          $LAKE_BIN --version || (echo "Lake not found at absolute path"; exit 1)
+          
+          echo "Starting lake update (this may take 5-10 minutes)..."
+          $LAKE_BIN update
+          
+          echo "Starting lake build..."
+          $LAKE_BIN build
 
+      # 3. 進捗確認
       - name: Progress Report
         run: |
-          echo "=== ASR Proof Status Report ==="
+          echo "=== ASR Proof Progress Report ==="
           grep -r "sorry" . --include="*.lean" | wc -l || true
