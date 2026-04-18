@@ -1,6 +1,27 @@
-      - name: Debug Build
+name: ASR Proof CI
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Elan and Build Project
         run: |
+          # 1. Elanのインストール
+          curl https://leanprover-community.github.io/elan/elan-init.sh -sSf | sh -s -- -y
+          
+          # 2. パスをこの実行セッションに強制適用
+          source $HOME/.elan/env
           export PATH="$HOME/.elan/bin:$PATH"
-          # エラーの詳細（スタックトレース）を表示させる
+          
+          # 3. 実行確認 (ここで見つからない場合は elan 自体が失敗している)
+          which lake || exit 1
+          
+          # 4. Mathlibの更新とビルドを一気に実行
           lake update
-          lake build -v
+          lake build
+          
+          # 5. 進捗レポート
+          echo "=== ASR Proof Progress Report ==="
+          grep -r "sorry" . --include="*.lean" | wc -l || true
