@@ -1,30 +1,6 @@
-name: ASR Proof CI
-on: [push]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Elan
+      - name: Debug Build
         run: |
-          curl https://leanprover-community.github.io/elan/elan-init.sh -sSf | sh -s -- -y
-          # 重要：インストール先を即座にGITHUB_PATHに登録
-          echo "$HOME/.elan/bin" >> $GITHUB_PATH
-
-      - name: Verify and Build
-        run: |
-          # パスを強制的にこのステップのセッションにも追加
           export PATH="$HOME/.elan/bin:$PATH"
-          
-          # コマンドの所在を確認（これでエラーならインストール失敗）
-          which lake
-          
+          # エラーの詳細（スタックトレース）を表示させる
           lake update
-          lake build
-
-      - name: Progress Report
-        run: |
-          echo "=== ASR Proof Status Report ==="
-          # sorry のカウント
-          grep -r "sorry" . --include="*.lean" | wc -l || true
+          lake build -v
