@@ -6,8 +6,8 @@ package «asr_unified_proof» {
 
 @[default_target]
 lean_lib «ASR» {
-  srcDir := "."
-  roots := #[`ASR, `Conjectures, `Constants]
+  -- ASR, Conjectures, Constants フォルダをすべて含める設定
+  globs := #[.submodules `ASR, .submodules `Conjectures, .submodules `Constants]
 }
 
 require mathlib from git
