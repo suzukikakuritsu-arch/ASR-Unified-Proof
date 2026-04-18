@@ -6,21 +6,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 1. Elanのインストールとパスの明示的な追加
       - name: Install Elan (Lean 4 Manager)
         run: |
           curl https://leanprover-community.github.io/elan/elan-init.sh -sSf | sh -s -- -y
+          # 次のステップから実行ファイルが見えるように GitHub のパスに追加
           echo "$HOME/.elan/bin" >> $GITHUB_PATH
 
+      # 2. Mathlib の取得（初回は時間がかかります）
       - name: Lake Update
-        # $GITHUB_PATH に追加した後は、このステップから lake が使えるようになります
         run: |
+          # elan を介して最新の lean-toolchain を適用
           lake update
 
+      # 3. ビルド実行
       - name: Lake Build
         run: |
           lake build
 
+      # 4. 証明の進捗確認（sorryカウンター）
       - name: Check for Sorry
         run: |
-          echo "Count of remaining 'sorry':"
+          echo "Current Sorry Count:"
           grep -r "sorry" . | wc -l
