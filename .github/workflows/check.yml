@@ -1,4 +1,4 @@
-name: ASR Proof CI
+name: ASR Unified Proof CI
 on: [push]
 jobs:
   build:
@@ -6,9 +6,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      # これだけで Lean 4 環境は整います。
-      - uses: leanprover/lean-action@v1
+      # ASRプロジェクトに Lean 4 と Lake の環境を準備する
+      - name: Setup Lean 4
+        uses: leanprover/lean-action@v1
+        with:
+          # ここでビルドまで任せることで、パスの問題を物理的に排除します
+          build: true
 
-      # 前のステップで elan がパスを通しているので、そのまま叩けるはず。
-      - name: Build
-        run: lake build
+      # 証明内の 'sorry' (未完成部分) を進捗として可視化する
+      - name: ASR Proof Progress
+        run: |
+          echo "=== ASR Unified Proof Status ==="
+          grep -r "sorry" . --include="*.lean" | wc -l || true
